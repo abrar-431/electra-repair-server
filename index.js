@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 
@@ -28,6 +28,17 @@ async function run() {
     await client.db("admin").command({ ping: 1 });
     const serviceCollection = client.db("serviceDB").collection("services");
 
+
+    app.get('/services', async(req, res)=>{
+        const result = await serviceCollection.find().toArray();
+        res.send(result);
+    })
+    app.get('/services/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await serviceCollection.find(query);
+      res.send(result);
+    })
     app.post('/services', async(req, res)=>{
         const newService = req.body;
         const result = await serviceCollection.insertOne(newService);
