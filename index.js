@@ -30,28 +30,60 @@ async function run() {
     const bookedServiceCollection = client.db("serviceDB").collection("bookedServices");
 
 
-    app.get('/services', async(req, res)=>{
-        const result = await serviceCollection.find().toArray();
-        res.send(result);
+    app.get('/services', async (req, res) => {
+      const email = req.query?.email;
+      let query = {};
+      if (email) {
+        query = { providerEmail: email };
+      }
+      const result = await serviceCollection.find(query).toArray();
+      res.send(result);
     })
-    app.get('/services/:id', async(req, res)=>{
+    app.get('/services/:id', async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await serviceCollection.findOne(query);
       res.send(result);
     })
-    app.post('/services', async(req, res)=>{
-        const newService = req.body;
-        const result = await serviceCollection.insertOne(newService);
-        res.send(result);
+    app.post('/services', async (req, res) => {
+      const newService = req.body;
+      const result = await serviceCollection.insertOne(newService);
+      res.send(result);
+    })
+    app.put('/services/:id', async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const options = {upsert: true};
+      const service = req.body;
+      const updateService = {
+        $set: {
+          service: service.service, 
+          area: service.area,
+          image: service.image, 
+          price: service.price, 
+          description: service.description,
+        },
+      };
+      const result = await serviceCollection.updateOne(filter, updateService, options);
+      res.send(result);
+    })
+    app.delete('/services/:id', async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const result = await serviceCollection.deleteOne(filter);
+      res.send(result);
     })
 
     // Booked Services
-    app.post('/booked-services', async(req, res)=>{
+    app.post('/booked-services', async (req, res) => {
       const newService = req.body;
       const result = await bookedServiceCollection.insertOne(newService);
       res.send(result);
-  })
+    })
+    app.get('/booked-services', async(req, res)=>{
+      const result = await bookedServiceCollection.find().toArray();
+      res.send(result);
+    })
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
@@ -61,10 +93,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/', async(req, res)=>{
-    res.send('Electra Repair Server running');
+app.get('/', async (req, res) => {
+  res.send('Electra Repair Server running');
 })
 
-app.listen(port, ()=>{
-    console.log('Electra repair running on port,', port);
+app.listen(port, () => {
+  console.log('Electra repair running on port,', port);
 })
