@@ -39,6 +39,25 @@ async function run() {
       const result = await serviceCollection.find(query).toArray();
       res.send(result);
     })
+
+    app.get('/popular-services', async (req, res) => {
+      const result = await bookedServiceCollection.aggregate([
+        {
+          $group: {
+              _id: "$id",
+              count: { $sum: 1 },
+              area: { $first: "$area" },
+              image: { $first: "$image" },
+              price: { $first: "$price" },
+              providerName: { $first: "$name" },
+              providerImage: { $first: "$providerImage" },
+              service: { $first: "$service" },
+          }
+      },
+      { $sort: { count: -1 } }
+    ]).toArray();
+      res.send(result);
+    })
     app.get('/services/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
