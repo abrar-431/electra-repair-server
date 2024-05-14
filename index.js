@@ -40,6 +40,13 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/searched-services', async(req, res)=>{
+      const searchedText = req.query.search;
+      const query = {service: {$regex: searchedText, $options: 'i'}}
+      const result = await serviceCollection.find(query).toArray();
+      res.send(result)
+    })
+
     app.get('/popular-services', async (req, res) => {
       const result = await bookedServiceCollection.aggregate([
         {
