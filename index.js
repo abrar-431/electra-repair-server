@@ -84,6 +84,18 @@ async function run() {
       const result = await bookedServiceCollection.find().toArray();
       res.send(result);
     })
+    app.patch('/booked-services/:id', async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const service = req.body;
+      const updateService = {
+        $set: {
+          serviceStatus: service.status,
+        },
+      };
+      const result = await bookedServiceCollection.updateOne(filter, updateService);
+      res.send(result);
+    })
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
