@@ -6,7 +6,15 @@ require('dotenv').config()
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://electra-repair.web.app",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.salgcrv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -23,9 +31,9 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     const serviceCollection = client.db("serviceDB").collection("services");
     const bookedServiceCollection = client.db("serviceDB").collection("bookedServices");
 
@@ -59,6 +67,7 @@ async function run() {
               providerName: { $first: "$name" },
               providerImage: { $first: "$providerImage" },
               service: { $first: "$service" },
+              description: { $first: "$description" },
           }
       },
       { $sort: { count: -1 } }
