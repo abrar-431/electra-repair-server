@@ -50,7 +50,11 @@ async function run() {
 
     app.get('/searched-services', async(req, res)=>{
       const searchedText = req.query.search;
-      const query = {service: {$regex: searchedText, $options: 'i'}}
+      const locationText = req.query.location;
+      let query = {service: {$regex: searchedText, $options: 'i'}};
+      if(locationText){
+        query.area = locationText
+      }
       const result = await serviceCollection.find(query).toArray();
       res.send(result)
     })
